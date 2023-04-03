@@ -1,7 +1,7 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:isolates/model/post_model.dart';
 import 'package:isolates/screens/components/posts_item.dart';
+import 'package:isolates/services/call_api.dart';
 
 class SecondScreen extends StatefulWidget {
   const SecondScreen({Key? key}) : super(key: key);
@@ -13,16 +13,9 @@ class SecondScreen extends StatefulWidget {
 class _SecondScreenState extends State<SecondScreen> {
   List<PostModel> posts = [];
 
-  Future<List<PostModel>> getData() async {
-    final dio = Dio();
-    var response = await dio.get('https://jsonplaceholder.typicode.com/todos');
-    Iterable listPost = response.data;
-    posts.addAll(listPost.map((e) => PostModel.fromJson(e)).toList());
-    return posts;
-  }
-
   getPosts() async {
-    await getData();
+    var data = await CallApi().getData();
+    posts.addAll(data);
   }
 
   @override
@@ -57,7 +50,7 @@ class _SecondScreenState extends State<SecondScreen> {
 
   Widget _buildUI(BuildContext context) {
     return FutureBuilder(
-      future: getData(),
+      future: CallApi().getData(),
       builder: (BuildContext context, AsyncSnapshot<List<PostModel>> snapshot) {
         return Expanded(
           child: ListView.builder(
