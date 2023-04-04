@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:isolates/model/post_model.dart';
-import 'package:isolates/screens/components/posts_item.dart';
+import 'package:isolates/screens/components/post_detail.dart';
+import 'package:isolates/screens/components/post_item.dart';
 import 'package:isolates/services/call_api.dart';
 
 class SecondScreen extends StatefulWidget {
@@ -16,6 +17,16 @@ class _SecondScreenState extends State<SecondScreen> {
   getPosts() async {
     var data = await CallApi().getData();
     posts.addAll(data);
+    setState(() {});
+  }
+
+  selectedPost(int index) {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => PostDetail(
+                  post: posts[index],
+                )));
   }
 
   @override
@@ -28,21 +39,19 @@ class _SecondScreenState extends State<SecondScreen> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async => false,
-      child: SafeArea(
-        child: Scaffold(
-          appBar: AppBar(
-            leading: IconButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              icon: const Icon(Icons.backspace),
-            ),
+      child: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            icon: const Icon(Icons.backspace),
           ),
-          body: Column(
-            children: [
-              _buildUI(context),
-            ],
-          ),
+        ),
+        body: Column(
+          children: [
+            _buildUI(context),
+          ],
         ),
       ),
     );
@@ -52,14 +61,20 @@ class _SecondScreenState extends State<SecondScreen> {
     return FutureBuilder(
       future: CallApi().getData(),
       builder: (BuildContext context, AsyncSnapshot<List<PostModel>> snapshot) {
+        if (!snapshot.hasData) return const Center(child: Text('Loading'));
         return Expanded(
-          child: ListView.builder(
-              itemCount: posts.length,
-              itemBuilder: (context, index) {
-                return PostItem(
-                  post: posts[index],
-                );
-              }),
+          child: ListView.separated(
+            itemCount: posts.length,
+            itemBuilder: (context, index) {
+              return PostItem(
+                post: posts[index],
+                selectedPost: () => selectedPost(index),
+              );
+            },
+            separatorBuilder: (context, index) {
+              return const Divider();
+            },
+          ),
         );
       },
     );
