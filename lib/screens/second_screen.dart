@@ -78,6 +78,7 @@ class _SecondScreenState extends State<SecondScreen> {
         if (!snapshot.hasData) return const Center(child: Text('Loading'));
         return Expanded(
           child: ListView.separated(
+            padding: const EdgeInsets.symmetric(vertical: 12),
             itemCount: posts.length,
             itemBuilder: (context, index) {
               return PostItem(
