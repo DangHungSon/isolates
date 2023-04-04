@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:isolates/bloc/post_bloc/post_bloc.dart';
+import 'package:isolates/bloc/post_bloc/post_event.dart';
+import 'package:isolates/bloc/post_bloc/post_state.dart';
 import 'package:isolates/model/post_model.dart';
 import 'package:isolates/screens/components/post_detail.dart';
 import 'package:isolates/screens/components/post_item.dart';
@@ -15,9 +19,7 @@ class _SecondScreenState extends State<SecondScreen> {
   List<PostModel> posts = [];
 
   getPosts() async {
-    var data = await CallApi().getData();
-    posts.addAll(data);
-    setState(() {});
+    BlocProvider.of<PostBloc>(context).add(const RequestGetPost());
   }
 
   selectedPost(int index) {
@@ -37,6 +39,18 @@ class _SecondScreenState extends State<SecondScreen> {
 
   @override
   Widget build(BuildContext context) {
+    return BlocConsumer<PostBloc, PostState>(
+      builder: (context, state) => _buildUI(context),
+      listener: (context, state) {
+        if (state is PostLoading) {
+        } else if (state is PostLoaded) {
+          posts = state.posts;
+        } else if (state is PostLoadError) {}
+      },
+    );
+  }
+
+  Widget _buildUI(BuildContext context) {
     return WillPopScope(
       onWillPop: () async => false,
       child: Scaffold(
@@ -50,14 +64,14 @@ class _SecondScreenState extends State<SecondScreen> {
         ),
         body: Column(
           children: [
-            _buildUI(context),
+            _buildBody(context),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildUI(BuildContext context) {
+  Widget _buildBody(BuildContext context) {
     return FutureBuilder(
       future: CallApi().getData(),
       builder: (BuildContext context, AsyncSnapshot<List<PostModel>> snapshot) {
